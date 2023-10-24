@@ -1,17 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  //   cart: [],
-
-  cart: [
-    {
-      pizzaId: 12,
-      name: "Mediterranean",
-      quantity: 2,
-      unitPrice: 16,
-      totalPrice: 32,
-    },
-  ],
+  cart: [],
 };
 
 const cartSlice = createSlice({
@@ -26,7 +16,7 @@ const cartSlice = createSlice({
       // payload = pizza id
       state.cart = state.cart.filter((item) => item.pizzaId !== action.payload);
     },
-    increaceItemQuantity(state, action) {
+    increaseItemQuantity(state, action) {
       // payload = pizza id
       const item = state.cart.find((item) => item.pizzaId === action.payload);
       item.quantity++;
@@ -37,6 +27,8 @@ const cartSlice = createSlice({
       const item = state.cart.find((item) => item.pizzaId === action.payload);
       item.quantity--;
       item.totalPrice = item.quantity * item.unitPrice;
+
+      if (item.quantity === 0) cartSlice.caseReducers.deleteItem(state, action);
     },
     clearCart(state) {
       state.cart = [];
@@ -47,9 +39,28 @@ const cartSlice = createSlice({
 export const {
   addItem,
   deleteItem,
-  increaceItemQuantity,
+  increaseItemQuantity,
   deacreaseItemQuantity,
   clearCart,
 } = cartSlice.actions;
 
 export default cartSlice.reducer;
+
+export const getCart = (state) => state.cart.cart;
+
+export const getTotalCartQuantity = (state) =>
+  state.cart.cart.reduce((sum, item) => sum + item.quantity, 0);
+
+export const getTotalCartPrice = (state) =>
+  state.cart.cart.reduce((sum, item) => sum + item.totalPrice, 0);
+
+export function getCurrentQuantityById(id) {
+  return function (state) {
+    return state.cart.cart.find((item) => item.pizzaId === id)?.quantity ?? 0;
+  };
+}
+
+/*
+ *   These kind of select operations might cause performance issues in large
+ *   apps. In that case look for "reselect"
+ */
